@@ -38,16 +38,27 @@ public class PowerPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "getPowerMode") {
-            val powerManager: PowerManager = applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val powerSaveMode: Boolean = powerManager.isPowerSaveMode
-            result.success(powerSaveMode)
+            if (android.os.Build.VERSION.SDK_INT >= 21) {
+                val powerManager: PowerManager = applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+                result.success(powerManager.isPowerSaveMode)
+            } else {
+                result.success(false);
+            }
         } else if (call.method == "getBatteryLevel") {
-            val batteryManager: BatteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-            val batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-            result.success(batteryLevel)
-        } else if(call.method == "getChargingStatus"){
-            val batteryManager: BatteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-            result.success(batteryManager.isCharging)
+            if (android.os.Build.VERSION.SDK_INT >= 21) {
+                val batteryManager: BatteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                val batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                result.success(batteryLevel)
+            } else {
+                result.success(100)
+            }
+        } else if (call.method == "getChargingStatus") {
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                val batteryManager: BatteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                result.success(batteryManager.isCharging)
+            } else {
+                result.success(false)
+            }
         } else {
             result.notImplemented()
         }
